@@ -1,0 +1,37 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    // Owner = verified owner email only. Sign in with Google so the email is verified.
+    function isOwner() { return signedIn() && request.auth.token.email == 'patacjustinekeo@gmail.com' && request.auth.token.email_verified == true; }
+    function mine(uid) { return signedIn() && request.auth.uid == uid; }
+
+    match /menu/{id} {
+      allow read: if true;
+      allow write: if isOwner();
+    }
+    match /orders/{id} {
+      allow read: if isOwner() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow create: if mine(request.resource.data.uid)
+        && request.resource.data.status == 'Received'
+        && request.resource.data.total is number && request.resource.data.total > 0
+        && request.resource.data.keys().hasOnly(['uid','name','email','phone','kind','summary','details','total','date','method','address','notes','status','createdAt','preview'])
+        && (!('preview' in request.resource.data) || request.resource.data.preview.size() < 300000);
+      allow update: if isOwner() || (mine(resource.data.uid) && resource.data.status == 'Received'
+        && request.resource.data.status == 'Cancelled'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']));
+      allow delete: if isOwner();
+    }
+    match /chats/{uid} {
+      allow read, write: if isOwner() || mine(uid);
+      match /messages/{mid} {
+        allow read: if isOwner() || mine(uid);
+        allow create: if (isOwner() && request.resource.data.from == 'owner') || (mine(uid) && request.resource.data.from == 'customer')
+          && request.resource.data.keys().hasOnly(['from','at','text','img'])
+          && (!('text' in request.resource.data) || request.resource.data.text.size() <= 1000)
+          && (!('img' in request.resource.data) || request.resource.data.img.size() < 700000);
+        allow update, delete: if isOwner();
+      }
+    }
+  }
+}

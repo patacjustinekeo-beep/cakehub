@@ -1,0 +1,12 @@
+import { auth, A } from "./firebase.js";
+import { $, friendly } from "./app.js";
+const next = new URLSearchParams(location.search).get("next") || "dashboard.html";
+const go = () => location.href = /^[\w-]+\.html/.test(next) ? next : "dashboard.html";
+A.onAuthStateChanged(auth, u => u && go());
+const say = t => { $("#msg").textContent = t; };
+const tabs = [...document.querySelectorAll("[data-tab]")];
+tabs.forEach(b => b.onclick = () => { tabs.forEach(x => x.setAttribute("aria-selected", x === b)); $("#signup").hidden = b.dataset.tab !== "up"; $("#login").hidden = b.dataset.tab !== "in"; say(""); });
+$("#login").onsubmit = async e => { e.preventDefault(); const f = new FormData(e.target); try { await A.signInWithEmailAndPassword(auth, f.get("email"), f.get("password")); } catch (x) { say(friendly(x)); } };
+$("#signup").onsubmit = async e => { e.preventDefault(); const f = new FormData(e.target); try { const c = await A.createUserWithEmailAndPassword(auth, f.get("email"), f.get("password")); await A.updateProfile(c.user, { displayName: f.get("name") }); A.sendEmailVerification(c.user).catch(() => { }); } catch (x) { say(friendly(x)); } };
+$("#google").onclick = async () => { try { await A.signInWithPopup(auth, new A.GoogleAuthProvider()); } catch (x) { say(friendly(x)); } };
+$("#reset").onclick = async () => { const em = $("#login").email.value; if (!em) return say("Type your email above first."); try { await A.sendPasswordResetEmail(auth, em); say("Reset link sent. Check your email."); } catch (x) { say(friendly(x)); } };
