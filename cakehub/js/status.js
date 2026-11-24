@@ -1,1 +1,1 @@
-export const STATUS = { Received: "", Confirmed: "", Baking: "", Ready: "", Completed: "", Cancelled: "" };
+export const STATUS = { Received: "We got your order. We will review and confirm it in your chat.", Confirmed: "Confirmed. We will start baking soon.", Baking: "Your cake is being baked.", Ready: "Ready for pickup or delivery.", Completed: "Done. Thank you!", Cancelled: "This order was cancelled." };

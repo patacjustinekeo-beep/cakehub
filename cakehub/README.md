@@ -1,47 +1,36 @@
-# CakeHub Tagbilaran (Vite + npm)
+# CakeHub Tagbilaran (Vite + Firebase)
 
-Fast multi-page site built with Vite. Firebase is installed from npm (`firebase` package), with login, orders, owner and customer dashboards, live chat with photos, a menu and a "design your own cake" page.
+Luxury editorial cake shop website: catalog with filters and search, product pages, shopping bag, checkout, custom cake designer with a rotating 360 degree preview, customer accounts with chat, and an admin dashboard.
 
 ## Run in GitHub Codespaces
 ```
-unzip cakehub-vite.zip && cd cakehub-vite
+unzip cakehub-vite.zip && cd cakehub-lux
 npm install
 npm run dev
 ```
-Codespaces shows a pop-up for port **5173**. Click "Open in Browser".
-
-## Build and deploy
-```
-npm run build      # makes the dist/ folder
-npm run preview    # test the built site locally
-```
-Upload `dist/` to GitHub Pages, Netlify, Vercel, or run `firebase deploy` (Firebase Hosting, uses `dist`). Add your final domain to Firebase Auth authorized domains.
+Open port **5173**. Build with `npm run build` (output in `dist/`).
 
 ## One-time Firebase setup (project cakehub-86ee9)
 1. Authentication > Sign-in method: turn on **Email/Password** and **Google**.
-2. Authentication > Settings > Authorized domains: add your Codespaces domain (ends in `app.github.dev`) and your final website domain. Without this, login shows a "not allowed" message.
-3. Firestore Database > Create database (production mode).
-4. Firestore > Rules: paste `firestore.rules` and Publish (or `npx firebase-tools deploy --only firestore:rules`).
-5. Open the site, **Log in > Continue with Google** with **patacjustinekeo@gmail.com**. The button changes to **Owner panel**. In Menu, tap **Load starter menu**, then edit prices.
+2. Authentication > Settings > Authorized domains: add your Codespaces domain (ends in `app.github.dev`) and your final domain.
+3. Firestore Database > Create database.
+4. Firestore > Rules: paste `firestore.rules` and **Publish** (it has new rules for products, settings, contact messages and the newsletter).
+5. Log in as the owner (patacjustinekeo@gmail.com) with Google, or with a password after verifying the email. The top bar shows **Admin**.
+6. Admin > Products > **Load starter products**, then edit names, prices and photos. Admin > Site: set delivery fee, payment methods and your contact details.
 
-## Notes
-- The owner must sign in with Google (verified email). The rules only trust the verified owner email.
-- Chat photos are shrunk in the browser and saved in Firestore, so paid Firebase Storage is not needed.
-- Edit `js/config.js` for phone, address, hours, prices and cake options.
-- Add a new page: create `name.html` in the root; Vite picks it up automatically.
+## What is where
+- Shop: Home, Our Cakes (search, category, price, sort), product pages, Shopping Bag, Checkout, Order confirmation.
+- Custom Cakes: layers, shape, size, flavor, filling, frosting, colors, drip or smooth, borders, toppings, cupcakes, message, reference photo, quantity. Live 360 degree preview. Sent as a request (status Received) that you approve in Admin > Orders.
+- Account: orders and status tracking, chat with photos, profile.
+- Admin: Overview, Orders (status, payment status, approve, cancel), Products, Customers, Site (homepage text, promo banner, business info, delivery fee, payment methods), Chats.
+- `js/config.js`: prices and colors of the designer options.
 
-## Photos and prices (please check)
-- Cake photos in `public/images/` were cropped from your Facebook screenshots. Replace them with originals for sharper pictures (keep the same file names).
-- Only the 2-tier price (₱2,500) comes from your poster. Other starter menu prices and the Customize prices in `js/config.js` are placeholders.
-- Make sure customers agree to their cakes (and names on them) being shown on the website.
+## Things to check
+- Product prices are placeholders (only the 2-tier wedding price comes from your poster). Edit them in Admin > Products.
+- Photos were cropped from your Facebook screenshots, so they are small. Upload better originals in Admin > Products (they are saved compressed in Firestore, no paid Storage needed). Make sure customers agree to their cakes and names being shown.
+- Testimonials are demo text. Replace them with real reviews. Mission and vision text is generic. Privacy and Terms pages are templates to review.
+- No online payment is connected. Checkout never says a payment was processed. GCash and bank transfer stay off until you add instructions in Admin > Site.
+- Prices in the cart are saved by the browser, so you confirm the final total in chat.
 
-## Cake designer (customize.html)
-- Options on the left: layers (1 to 3), shape (round, square, hexagon, heart), size, flavor, filling, frosting, main and accent colors (swatches or any custom color), side finish (smooth or drip), border, toppings, cupcakes, message and notes.
-- Live preview on the right. Drag it, use the slider, or press the left and right arrow keys to rotate 360 degrees.
-- **Send design** saves an order with a picture of the cake and also posts the picture and a summary in the customer's chat, so you see it in the Owner panel under Orders and Chats.
-- Prices for every option are in `js/config.js` under `design`.
-- **Publish `firestore.rules` again.** Orders now accept a `preview` picture.
-
-## Speed on low-end phones
-- The preview is drawn with a small custom renderer (no 3D library). It only redraws while the cake moves, pauses when the tab is hidden or off screen, and uses a lower resolution and fewer segments on weaker devices.
-- Weak devices also get a no-blur look automatically.
+## Speed
+No frameworks. Pages load only their own script. Images are lazy loaded with fixed sizes. The 3D preview is a small custom renderer that only redraws while moving, pauses when hidden, and uses lower quality on weaker devices. Blur effects are used only on the navigation, a few panels, and turn off on weak devices.

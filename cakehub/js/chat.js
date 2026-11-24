@@ -19,3 +19,4 @@ export function mountChat(el, uid, role, who) {
   f.querySelector("input[type=file]").onchange = async e => { const x = e.target.files[0]; if (!x) return; try { await send({ img: await shrink(x) }); } catch (er) { alert("Could not send the photo."); } e.target.value = ""; };
   return un;
 }
+export function shrinkImg(file, max = 700, q = .7) { return new Promise((res, rej) => { const i = new Image(), u = URL.createObjectURL(file); i.onload = () => { const s = Math.min(1, max / Math.max(i.width, i.height)), c = document.createElement("canvas"); c.width = Math.round(i.width * s); c.height = Math.round(i.height * s); c.getContext("2d").drawImage(i, 0, 0, c.width, c.height); URL.revokeObjectURL(u); res(c.toDataURL("image/jpeg", q)); }; i.onerror = rej; i.src = u; }); }
